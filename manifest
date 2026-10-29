@@ -1,0 +1,16 @@
+appname               = xuexikongjian
+version               = 1.5.0
+display_name          = 学习空间
+desc                  = 粉红童趣风儿童学习打卡应用：语文古诗/阅读/名言、数学每日两题、英语单词对话跟读、运动打卡、熊猫乐园养成、积分商店与题库管理。多用户访问时每个用户数据独立保存。
+source                = thirdparty
+platform              = x86
+arch                  = x86_64
+maintainer            = 凌
+desktop_uidir         = ui
+desktop_applaunchname = xuexikongjian.main
+os_min_version        = 1.2.0
+ctl_stop              = true
+checkport             = false
+install_dep_apps       = nodejs_v22
+disable_authorization_path = true
+changelog             = 题库支持批量导入与导出（含格式模板下载）；年级\/主题等设置即时保存并在页面关闭前兜底（含保存状态指示）；列表与弹窗支持鼠标滚轮滚动并显示滚动条。

@@ -1,0 +1,5 @@
+#!/bin/bash
+### 学习空间：安装后准备服务端数据目录
+mkdir -p "${TRIM_PKGVAR}"
+chmod 777 "${TRIM_PKGVAR}" 2>/dev/null || true
+exit 0

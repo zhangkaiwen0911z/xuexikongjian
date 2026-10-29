@@ -1,0 +1,74 @@
+#!/bin/bash
+### 学习空间 - 统一网关服务生命周期脚本
+### 依赖运行时: nodejs_v22（manifest install_dep_apps 声明）
+### 服务监听 Unix Socket（不占用 TCP 端口）
+
+set -euo pipefail
+
+export PATH=/var/apps/nodejs_v22/target/bin:$PATH
+
+APP_JS="${TRIM_APPDEST}/server/server.js"
+SOCKET="${TRIM_APPDEST}/app.sock"
+PID_FILE="${TRIM_PKGVAR}/app.pid"
+LOG_FILE="${TRIM_PKGVAR}/app.log"
+
+is_running() {
+  [ -f "$PID_FILE" ] || return 1
+  local pid
+  pid=$(cat "$PID_FILE" 2>/dev/null || true)
+  [ -n "$pid" ] || return 1
+  kill -0 "$pid" 2>/dev/null
+}
+
+start_app() {
+  if is_running; then
+    return 0
+  fi
+  if ! command -v node >/dev/null 2>&1; then
+    echo "未找到 nodejs_v22 运行时，请确认应用中心已安装该依赖。" > "$TRIM_TEMP_LOGFILE"
+    return 1
+  fi
+  if [ ! -f "$APP_JS" ]; then
+    echo "未找到服务程序 ${APP_JS}" > "$TRIM_TEMP_LOGFILE"
+    return 1
+  fi
+  mkdir -p "$TRIM_PKGVAR"
+  rm -f "$PID_FILE" "$SOCKET"
+  nohup env SOCKET_PATH="$SOCKET" DATA_DIR="$TRIM_PKGVAR" node "$APP_JS" >> "$LOG_FILE" 2>&1 &
+  echo $! > "$PID_FILE"
+  sleep 1
+  if ! is_running || [ ! -S "$SOCKET" ]; then
+    rm -f "$PID_FILE" "$SOCKET"
+    echo "学习空间服务启动失败，请查看日志 ${LOG_FILE}" > "$TRIM_TEMP_LOGFILE"
+    return 1
+  fi
+  echo "学习空间网关服务已启动"
+}
+
+stop_app() {
+  if ! is_running; then
+    rm -f "$PID_FILE" "$SOCKET"
+    return 0
+  fi
+  local pid
+  pid=$(cat "$PID_FILE")
+  kill "$pid" 2>/dev/null || true
+  local count=0
+  while kill -0 "$pid" 2>/dev/null && [ "$count" -lt 15 ]; do
+    sleep 1
+    count=$((count + 1))
+  done
+  if kill -0 "$pid" 2>/dev/null; then
+    kill -KILL "$pid" 2>/dev/null || true
+  fi
+  rm -f "$PID_FILE" "$SOCKET"
+  return 0
+}
+
+case "${1:-}" in
+  start)   start_app ;;
+  stop)    stop_app ;;
+  restart) stop_app; start_app ;;
+  status)  if is_running && [ -S "$SOCKET" ]; then exit 0; else exit 3; fi ;;
+  *)       echo "Usage: $0 {start|stop|restart|status}" >&2; exit 1 ;;
+esac

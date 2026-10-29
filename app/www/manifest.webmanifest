@@ -1,0 +1,15 @@
+{
+  "name": "学习空间",
+  "short_name": "学习空间",
+  "description": "宝贝的粉红学习空间：语文、数学、英语、运动打卡与熊猫乐园",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFB6C1",
+  "theme_color": "#FF69B4",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
